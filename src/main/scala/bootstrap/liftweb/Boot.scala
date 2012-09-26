@@ -6,7 +6,7 @@ import de.fbo.games.lib.SpielBroker
 import de.fbo.games.lib.SpielBroker
 import de.fbo.games.lib.SpielBroker
 import de.fbo.games.model._
-import de.fbo.games.snippet.SchereSteinPapier
+import de.fbo.games.snippet.SchereSteinPapierSnippet
 import net.liftweb.common._
 import net.liftweb.http.provider._
 import net.liftweb.http._
@@ -46,7 +46,7 @@ class Boot {
     // Build SiteMap
     def sitemap() = SiteMap(
       Menu("Games") / "index" >> gameGroup,
-      Menu("Current") / "curr" >> gameGroup >> Hidden >> Test(_ => SchereSteinPapier.isRunning.get)
+      Menu("Current") / "curr" >> gameGroup >> Hidden >> Test(_ => SchereSteinPapierSnippet.isRunning.get)
         >>
         User.AddUserMenusAfter)
 

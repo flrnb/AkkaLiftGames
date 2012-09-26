@@ -17,6 +17,9 @@ trait SpielTestHelper {
 
   abstract class DummySpiel(noOfSpieler: Int) extends Spiel {
     this: HasScorer =>
+    override def singleton = new SpielSingleton[DummySpiel] {
+      override def descriptor = SpielDescriptor[DummySpiel]("Dummy")
+    }
     override def spieler = for (i <- 1 to noOfSpieler) yield (Spieler("Spieler" + i))
     override def getGewinner(runde: Runde) = runde.headOption map (_._1) toSeq
 

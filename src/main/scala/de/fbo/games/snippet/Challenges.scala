@@ -1,20 +1,22 @@
 package de.fbo.games.snippet
-import scala.xml.{Text, NodeSeq}
-
+import scala.xml.{ Text, NodeSeq }
 import akka.actor.actorRef2Scala
-import akka.dispatch.{Future, Await}
+import akka.dispatch.{ Future, Await }
 import akka.pattern.ask
 import akka.util.Timeout
 import de.fbo.games.comet.ChallengeList.CreateChallenge
 import de.fbo.games.comet.ChallengeList
-import de.fbo.games.lib.{SpielDescriptor, SpielBroker, Challenge, AkkaEnvironment}
-import de.fbo.games.model.{User, Spieler}
-import net.liftweb.common.{Full, Failure, Empty, Box}
+import de.fbo.games.model.{ User, Spieler }
+import net.liftweb.common.{ Full, Failure, Empty, Box }
 import net.liftweb.http.js.JsCmds
 import net.liftweb.http.SHtml
 import net.liftweb.util.ConvertableToDate.toMillis
-import net.liftweb.util.Helpers.{tryo, strToCssBindPromoter, intToTimeSpanBuilder}
+import net.liftweb.util.Helpers.{ tryo, strToCssBindPromoter, intToTimeSpanBuilder }
 import net.liftweb.util.StringPromotable.jsCmdToStrPromo
+import de.fbo.games.model.SchereSteinPapier
+import de.fbo.games.lib.Challenge
+import de.fbo.games.lib.AkkaEnvironment
+import de.fbo.games.lib.SpielBroker
 
 class Challenges {
 
@@ -43,11 +45,14 @@ class Challenges {
       _ ! CreateChallenge(
         Challenge(
           spieler,
-          SpielDescriptor("Stein Schere Papier"))))
+          SchereSteinPapier.descriptor)))
 
   private def getChallenges(spieler: Spieler): Box[Seq[Challenge]] = {
     implicit val timeout = Timeout(5 seconds)
-    val challenges: Future[Seq[Challenge]] = (AkkaEnvironment.broker.vend ? SpielBroker.GetChallenges(spieler)).mapTo[Seq[Challenge]]
+    val challenges: Future[Seq[Challenge]] =
+      (AkkaEnvironment.broker.vend ?
+        SpielBroker.GetChallenges(spieler)).
+        mapTo[Seq[Challenge]]
     for (
       box <- tryo {
         Await.result(challenges, timeout.duration) match {

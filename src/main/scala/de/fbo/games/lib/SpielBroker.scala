@@ -3,17 +3,18 @@ package de.fbo.games.lib
 import akka.actor.actorRef2Scala
 import akka.actor.{ ActorRef, Actor }
 import de.fbo.games.model.Spieler
-case class Challenge(creator: Spieler, spiel: SpielDescriptor)
-case class SpielDescriptor(name: String)
+import de.fbo.games.model.SpielDescriptor
+import de.fbo.games.model.Spiel
+case class Challenge(creator: Spieler, spiel: SpielDescriptor[_ <: Spiel])
 
 object SpielBroker {
   /**
    * Messages
    */
   case class Register(userActor: ActorRef)
-  case class ChallengeAccepted(userActor: ActorRef, challenge: Challenge)
-  case class CreateChallenge(userActor: ActorRef, challenge: Challenge)
-  case class GetChallenges(spieler: Spieler)
+  case class ChallengeAccepted[S](userActor: ActorRef, challenge: Challenge)
+  case class CreateChallenge[S](userActor: ActorRef, challenge: Challenge)
+  case class GetChallenges[S](spieler: Spieler)
 }
 
 class SpielBroker extends Actor {

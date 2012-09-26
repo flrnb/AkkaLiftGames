@@ -1,10 +1,10 @@
 package de.fbo.games.snippet
 import net.liftweb.http.SessionVar
 
-object SchereSteinPapier {
+object SchereSteinPapierSnippet {
   object isRunning extends SessionVar[Boolean](false)
 }
 
-class SchereSteinPapier {
+class SchereSteinPapierSnippet {
 
 }
