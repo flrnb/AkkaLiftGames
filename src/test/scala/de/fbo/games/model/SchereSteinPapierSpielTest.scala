@@ -6,12 +6,12 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class SchereSteinPapierSpielSpec extends SpecificationWithJUnit with SpielTestHelper {
+class SchereSteinPapierSpielTest extends SpecificationWithJUnit with SpielTestHelper {
 
   "In a Stein-Schere-Papier-Spiel" should {
     val s1 = Spieler("Spieler1")
     val s2 = Spieler("Spieler2")
-    val spiel = new SchereSteinPapier(s1, s2) with DummyHasScorer
+    val spiel = new SchereSteinPapier(s1, s2) with MockHasScorer
     "Stein beat Schere" in {
       spiel.getResult(Map(s1 -> Stein, s2 -> Schere)) mustEqual Full(Seq(s1))
     }

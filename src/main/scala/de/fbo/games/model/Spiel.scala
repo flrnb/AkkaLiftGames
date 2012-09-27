@@ -4,12 +4,18 @@ import net.liftweb.common.{ Box, Full, Empty, Failure }
 case class Spieler(name: String)
 case class SpielDescriptor[T <: ISpiel](name: String)
 
+/**
+ * Fully abstract interface for Spiel
+ */
 trait ISpiel {
 
   type Zug
 
   def getResult(runde: Map[Spieler, Zug]): Box[Seq[Spieler]]
+
   def spieler: Seq[Spieler]
+
+  def scorer: Scorer
 }
 
 trait Spiel extends ISpiel with HasScorer {
