@@ -22,7 +22,7 @@ trait Scorer {
 
 trait HasScorer {
   this: ISpiel =>
-  def scorer: Scorer
+  val scorer: Scorer
 }
 
 trait HasBestOfThreeScorer extends HasScorer {

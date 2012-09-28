@@ -1,13 +1,13 @@
 package de.fbo.games.model
-import net.liftweb.common.{ Empty, Box }
-import scala.collection.SortedMap
+import scala.Option.option2Iterable
+import net.liftweb.common.{ Box, Empty }
 
 trait SpielTestHelper {
 
   trait MockHasScorer extends HasScorer {
     spiel: ISpiel =>
 
-    def scorer = new Scorer {
+    val scorer = new Scorer {
       val spieler = spiel.spieler
       def isEntschieden: Boolean = false
       def unentschieden: Unit = {}
@@ -19,7 +19,7 @@ trait SpielTestHelper {
   abstract class MockSpiel(noOfSpieler: Int) extends Spiel {
     this: HasScorer =>
     override def singleton = new SpielSingleton[MockSpiel] {
-      override def descriptor = SpielDescriptor[MockSpiel]("Dummy")
+      override def descriptor = SpielDescriptor[MockSpiel]("Dummy", noOfSpieler)
     }
     override def spieler = for (i <- 1 to noOfSpieler) yield (Spieler("Spieler" + i))
     override def getGewinner(runde: Runde) = runde.headOption map (_._1) toSeq

@@ -3,10 +3,7 @@ package bootstrap.liftweb
 import akka.actor.ActorSystem
 import de.fbo.games.lib.AkkaEnvironment
 import de.fbo.games.lib.SpielBroker
-import de.fbo.games.lib.SpielBroker
-import de.fbo.games.lib.SpielBroker
 import de.fbo.games.model._
-import de.fbo.games.snippet.SchereSteinPapierSnippet
 import net.liftweb.common._
 import net.liftweb.http.provider._
 import net.liftweb.http._
@@ -18,6 +15,9 @@ import net.liftweb.sitemap.Loc._
 import net.liftweb.sitemap._
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
+import de.fbo.games.lib.GameRegistry
+import de.fbo.games.lib.RegistryInjector
+import de.fbo.games.comet._
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -46,7 +46,7 @@ class Boot {
     // Build SiteMap
     def sitemap() = SiteMap(
       Menu("Games") / "index" >> gameGroup,
-      Menu("Current") / "curr" >> gameGroup >> Hidden >> Test(_ => SchereSteinPapierSnippet.isRunning.get)
+      Menu("Current") / "curr" >> gameGroup >> Hidden >> Test(_ => GameState.isRunning.get)
         >>
         User.AddUserMenusAfter)
 
@@ -60,6 +60,20 @@ class Boot {
 
     S.addAround(DB.buildLoanWrapper)
 
+    setUpGameEnvironment()
+
+  }
+
+  private def setUpGameEnvironment() {
+    val registry = new GameRegistry()
+    registry.addGame(SchereSteinPapier.descriptor, (sc, spieler) => {
+      require(spieler.size == 2)
+      new SchereSteinPapier(spieler.head, spieler.tail.head) {
+        val scorer = sc
+      }
+    })
+    //Inject Dependency
+    RegistryInjector.registry.default.set(registry)
   }
 
   /**

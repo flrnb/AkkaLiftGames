@@ -6,7 +6,7 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class SchereSteinPapierSpielTest extends SpecificationWithJUnit with SpielTestHelper {
+class SchereSteinPapierSpielTest extends Specification with SpielTestHelper {
 
   "In a Stein-Schere-Papier-Spiel" should {
     val s1 = Spieler("Spieler1")

@@ -2,7 +2,7 @@ package de.fbo.games.model
 
 object SchereSteinPapier extends SpielSingleton[SchereSteinPapier] {
 
-  override def descriptor = SpielDescriptor[SchereSteinPapier]("Schere Stein Papier")
+  override def descriptor = SpielDescriptor[SchereSteinPapier]("ssp", 2)
 
   sealed trait SSPZug {
     def schlaegt: SSPZug

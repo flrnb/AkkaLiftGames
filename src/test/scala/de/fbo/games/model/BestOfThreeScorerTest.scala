@@ -1,14 +1,13 @@
 package de.fbo.games.model
 
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable._
 import net.liftweb.common.{ Empty, Box, Full }
 import scala.collection.mutable
-import org.specs2.runner.JUnitRunner
-import org.junit.internal.runners.JUnit4ClassRunner
 import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class BestOfThreeScorerTest extends SpecificationWithJUnit with SpielTestHelper {
+class BestOfThreeScorerTest extends Specification with SpielTestHelper {
 
   val prefix = "A Best-Of-Three-Spiel with 2 players"
 

@@ -1,65 +1,47 @@
 package de.fbo.games.comet
-import scala.annotation.serializable
 import scala.xml.NodeSeq
-import de.fbo.games.lib.Challenge
-import de.fbo.games.lib.SpielBroker
-import de.fbo.games.model.User
-import net.liftweb.common.Box
-import net.liftweb.common.Empty
+
+import akka.actor.actorRef2Scala
+import akka.actor.Props
+import de.fbo.games.lib.{ UserActor, SpielBroker, AkkaEnvironment }
+import de.fbo.games.model.{ User, Challenge }
+import net.liftweb.common.Full
 import net.liftweb.http.js.JsCmd.unitToJsCmd
 import net.liftweb.http.js.jquery.JqWiringSupport
-import net.liftweb.http.SessionVar
-import net.liftweb.http.CometActor
-import net.liftweb.http.S
-import net.liftweb.http.SHtml
-import net.liftweb.http.WiringUI
+import net.liftweb.http.js.JsCmds
+import net.liftweb.http.{ WiringUI, SHtml, S, CometActor }
 import net.liftweb.util.StringPromotable.jsCmdToStrPromo
 import net.liftweb.util.ValueCell
-import net.liftweb.common.Full
-import akka.actor.Actor
-import akka.actor.ActorSystem
-import akka.actor.Props
-import akka.actor.ActorRef
-import de.fbo.games.lib.AkkaEnvironment
-import net.liftweb.http.js.JsCmds
 
 object ChallengeList {
-  case class CreateChallenge(c: Challenge)
-
-  def broker: ActorRef = AkkaEnvironment.broker.vend
-  val system = AkkaEnvironment.system.vend
-
-  object actor extends SessionVar[Box[ActorRef]](Empty)
-}
-
-class ChallengeListActor(comet: CometActor) extends Actor {
-  import ChallengeList._
-  override def receive = {
-    case CreateChallenge(c) =>
-      broker ! SpielBroker.CreateChallenge(self, c)
-    case challenges: Seq[_] =>
-      comet ! challenges
-  }
+  case object GameStarted
 }
 
 class ChallengeList extends CometActor {
   comet =>
 
-  import ChallengeList._
-
   override def localSetup() {
-    val clActor = system.actorOf(Props(new ChallengeListActor(this)))
-    actor.set(Full(clActor))
-    broker ! SpielBroker.Register(clActor)
+    val spieler = User.currentUser.open_!.asSpieler
+    val uActor = AkkaEnvironment.system.vend.actorOf(Props(new UserActor(spieler)))
+    uActor ! UserActor.ListenToChallenges(this)
+    UserActor.actor.set(Full(uActor))
     super.localSetup
   }
 
   val challengeList = ValueCell[Seq[Challenge]](Seq())
 
   override def lowPriority = {
-    case challenges: Seq[Challenge] =>
-      challengeList.atomicUpdate(_ => challenges)
+    case challenges: Traversable[Challenge] =>
+      challengeList.atomicUpdate(_ => challenges.toSeq)
       reRender(false)
+    case UserActor.OpponentDead =>
+      partialUpdate(JsCmds.Alert("Game aborted") &
+        JsCmds.RedirectTo("/"))
+    case UserActor.Start(spiel) =>
+      GameState.isRunning.atomicUpdate(_ => true)
+      partialUpdate(JsCmds.Confirm(S.??(spiel.descriptor.name) + "?",
+        JsCmds.RedirectTo("/curr")))
+
   }
 
   override def render = {
@@ -86,8 +68,8 @@ class ChallengeList extends CometActor {
   }
 
   private def acceptChallenge(c: Challenge) = {
-    ChallengeList.actor.is.foreach(actor => {
-      broker ! SpielBroker.ChallengeAccepted(actor, c)
+    UserActor.actor.is.foreach(actor => {
+      AkkaEnvironment.broker.vend ! SpielBroker.ChallengeAccepted(actor, c)
       S.notice("Accepted Challenge from " + c.creator.name)
     })
   }
