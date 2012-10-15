@@ -11,6 +11,12 @@ import net.liftweb.util.Helpers._
 import net.liftweb.common.Box
 import de.fbo.games.lib.UserActor._
 
+/**
+ * Actor for Handling a running game.
+ * It is initialized with a List of <code>ActorRef</code>s
+ * for each player and a Function: <code>Seq[Spieler] => ISpiel<code>,
+ * that creates a <code>ISpiel</code> from the obtained <code>Spieler</code>-objects
+ */
 class GameActor(startSpiel: Seq[Spieler] => ISpiel, spielerActors: Seq[ActorRef]) extends Actor {
 
   implicit val timeOut = Timeout(20 seconds)
@@ -18,29 +24,27 @@ class GameActor(startSpiel: Seq[Spieler] => ISpiel, spielerActors: Seq[ActorRef]
   var game: ISpiel = _
 
   override def preStart() {
-    println("Created!!!!! with " + spielerActors.size)
-
     val spieler = for (
       actor <- spielerActors;
-      val f = (actor ? UserActor.GetSpieler).mapTo[Spieler];
+      val future = (actor ? UserActor.GetSpieler).mapTo[Spieler];
       val box = tryo {
-        Await.result(f, timeOut.duration)
+        Await.result(future, timeOut.duration)
       } ?~! "Spieler not found";
       spieler <- box
     ) yield spieler
 
     if (spieler.size != spielerActors.size) {
+      //If a player is lost, notify others, then kill yourself
       notifyAll(UserActor.OpponentDead)
       context.stop(self)
     } else {
       game = startSpiel(spieler)
       notifyAll(Start(game))
-      println(">>>>>>>>>>>>>>>>>> Spiel gestartet!!! >>>>>>>>>>>>>>>>>>>")
     }
     super.preStart()
   }
 
-  private def notifyAll[T <: UserActorMessage](msg: T) {
+  private def notifyAll(msg: UserActorMessage) {
     spielerActors.foreach(_ ! msg)
   }
 

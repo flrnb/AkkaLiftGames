@@ -9,5 +9,5 @@ object GameState {
 }
 
 class SchereSteinPapierComet extends CometActor {
-  def render = "@gameName" #> S.??(SchereSteinPapier.descriptor.name)
+  def render = "@gameName" #> (S ? SchereSteinPapier.descriptor.name)
 }

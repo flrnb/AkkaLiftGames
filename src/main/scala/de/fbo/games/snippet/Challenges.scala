@@ -13,6 +13,7 @@ import net.liftweb.util.ConvertableToDate.toMillis
 import net.liftweb.util.Helpers.{ tryo, strToCssBindPromoter, intToTimeSpanBuilder }
 import net.liftweb.util.StringPromotable.jsCmdToStrPromo
 import de.fbo.games.lib.UserActor
+import net.liftweb.http.S.?
 
 class Challenges {
 
@@ -26,13 +27,14 @@ class Challenges {
       val spieler = user.asSpieler
     ) yield {
       val cssSel = getChallenges(spieler) match {
-        case Failure(msg, _, _) => {
+        case Failure(msg, _, _) =>
           "#add_new" #> msg
-        }
-        case Empty => "#add_new [onclick]" #> SHtml.ajaxInvoke(() => {
-          createSchereSteinPapierChallenge(spieler)
-          JsCmds.Replace("add_new", naText)
-        })
+        case Empty =>
+          "#add_new *" #> ?(SchereSteinPapier.descriptor.name) &
+            "#add_new [onclick]" #> SHtml.ajaxInvoke(() => {
+              createSchereSteinPapierChallenge(spieler)
+              JsCmds.Replace("add_new", naText)
+            })
         case _ => "#add_new" #> naText
       }
       cssSel(in)

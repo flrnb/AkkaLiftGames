@@ -71,7 +71,8 @@ class SpielBroker extends Actor {
     }
 
     case Register(spieler, user) => {
-      users = users + (spieler -> user)
+      if (!users.contains(spieler))
+        users = users + (spieler -> user)
       user ! challenges.keys
     }
 

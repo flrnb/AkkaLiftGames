@@ -39,7 +39,7 @@ class ChallengeList extends CometActor {
         JsCmds.RedirectTo("/"))
     case UserActor.Start(spiel) =>
       GameState.isRunning.atomicUpdate(_ => true)
-      partialUpdate(JsCmds.Confirm(S.??(spiel.descriptor.name) + "?",
+      partialUpdate(JsCmds.Confirm((S ? spiel.descriptor.name) + "?",
         JsCmds.RedirectTo("/curr")))
 
   }
