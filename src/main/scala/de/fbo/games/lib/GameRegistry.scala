@@ -11,7 +11,7 @@ object RegistryInjector extends SimpleInjector {
 
 class GameRegistry {
 
-  type Creator[T <: ISpiel] = (Scorer, Seq[Spieler]) => ISpiel
+  type Creator[T <: ISpiel] = (Scorer, Seq[Spieler]) => T
 
   private var games = Map[SpielDescriptor[_], Creator[_]]()
 
